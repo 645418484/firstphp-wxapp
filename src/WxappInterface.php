@@ -52,6 +52,23 @@ interface WxappInterface
     public function getNearbypoilist(int $page, int $page_rows, string $accessToken);
 
 
+
+    /**
+     * 微信退款
+     *
+     * @param string $accessToken       accessToken
+     * @param string $open_id           用户的openid
+     * @param string $mchid 	        订单对应的商家商户号
+     * @param string $trade_no          商家交易单号
+     * @param string $transaction_id     支付单号
+     * @param string $refund_no         商家退款单号，小程序系统内部唯一，只能是数字、大小写字母_-|*@，同一退款单号多次请求只退一笔。长度为6～32个字符。
+     * @param integer $total_amount     订单总金额
+     * @param integer $refund_amount    退款金额
+     *
+     * @return mixed
+     */
+    public function refundorder(string $accessToken = '', string $open_id, string $mchid, string $trade_no, string $transaction_id, string $refund_no, int $total_amount, int $refund_amount);
+
     /**
      * 获取小程序二维码 - 适用于需要的码数量较少的业务场景(永久有效，有数量限制)
      *
@@ -84,7 +101,7 @@ interface WxappInterface
      * @param bool|false $is_hyaline
      * @return mixed
      */
-    public function getWxacodeunlimit(string $scene='', string $page='', string $accessToken = '', int $width = 280, bool $is_hyaline = false);
+    public function getWxacodeunlimit(string $scene = '', string $page = '', string $accessToken = '', int $width = 280, bool $is_hyaline = false);
 
 
     /**
@@ -179,6 +196,4 @@ interface WxappInterface
      * @return mixed
      */
     public function postXmlCurl(string $xml, string $url, bool $useCert = false, int $second = 30);
-
-
 }

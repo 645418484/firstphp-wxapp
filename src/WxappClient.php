@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 /**
  * Created by PhpStorm.
@@ -148,7 +148,7 @@ class WxappClient implements WxappInterface
      * @param int $width
      * @param bool|false $is_hyaline
      */
-    public function getWxacodeunlimit(string $scene='id=1', string $page='', string $accessToken = '', int $width = 280, bool $is_hyaline = false)
+    public function getWxacodeunlimit(string $scene = 'id=1', string $page = '', string $accessToken = '', int $width = 280, bool $is_hyaline = false)
     {
         return $this->http->post('wxa/getwxacodeunlimit?access_token=' . $accessToken, [
             'json' => [
@@ -164,16 +164,17 @@ class WxappClient implements WxappInterface
     /**
      * 生成小程序二维码
      */
-    public function getWxacodeunlimit2($path = '/', $accessToken = '') {
+    public function getWxacodeunlimit2($path = '/', $accessToken = '')
+    {
         $params = [
             'scene' => 'id=1',
             'path' => $path,
             'width' => 430,
         ];
-        $res = $this->httpPostJson('https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token='.$accessToken, json_encode($params));
+        $res = $this->httpPostJson('https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=' . $accessToken, json_encode($params));
         $decodeRes = json_decode($res[1], true);
         if (isset($decodeRes['errcode'])) {
-            return ['code' => $decodeRes['errcode'], 'msg' =>$decodeRes['errmsg']];
+            return ['code' => $decodeRes['errcode'], 'msg' => $decodeRes['errmsg']];
         } else {
             return ['code' => 200, 'data' => $res[1]];
         }
@@ -224,7 +225,34 @@ class WxappClient implements WxappInterface
             ]
         ]);
     }
-
+    /**
+     * 微信退款
+     *
+     * @param string $accessToken       accessToken
+     * @param string $openid            用户的openid
+     * @param string $mchid 	        订单对应的商家商户号
+     * @param string $trade_no          商家交易单号
+     * @param string $transaction_id     支付单号
+     * @param string $refund_no         商家退款单号，小程序系统内部唯一，只能是数字、大小写字母_-|*@，同一退款单号多次请求只退一笔。长度为6～32个字符。
+     * @param integer $total_amount     订单总金额
+     * @param integer $refund_amount    退款金额
+     *
+     * @return mixed
+     */
+    public function refundorder(string $accessToken = '', string $openid, string $mchid, string $trade_no, string $transaction_id, string $refund_no, int $total_amount, int $refund_amount)
+    {
+        return $this->http->post('shop/pay/refundorder?access_token=' . $accessToken, [
+            'query' => [
+                'openid' => $openid,
+                'mchid' => $mchid,
+                'trade_no' => $trade_no,
+                'transaction_id' => $transaction_id,
+                'refund_no' => $refund_no,
+                'total_amount' => $total_amount,
+                'refund_amount' => $refund_amount
+            ]
+        ]);
+    }
 
     /**
      * @param string $media
@@ -248,7 +276,8 @@ class WxappClient implements WxappInterface
      *
      * @return int 成功0，失败返回对应的错误码
      */
-    public function decryptData(string $encryptedData = '', string $iv = '', string $sessionKey = '') {
+    public function decryptData(string $encryptedData = '', string $iv = '', string $sessionKey = '')
+    {
         if (strlen($sessionKey) != 24) {
             return ['code' => self::ILLEGAL_AES_KEY, 'message' => 'sessionKey is error'];
         }
@@ -352,19 +381,20 @@ class WxappClient implements WxappInterface
      * @param int $second
      * @return int|mixed
      */
-    public function unifiedorder(array $orderData, int $second = 30) {
+    public function unifiedorder(array $orderData, int $second = 30)
+    {
         $xmlData = $this->dataToXml($orderData);
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_TIMEOUT, $second);
-        curl_setopt($ch,CURLOPT_URL, $url = 'https://api.mch.weixin.qq.com/pay/unifiedorder');
-        curl_setopt($ch,CURLOPT_SSL_VERIFYPEER,TRUE);
-        curl_setopt($ch,CURLOPT_SSL_VERIFYHOST,2);
+        curl_setopt($ch, CURLOPT_URL, $url = 'https://api.mch.weixin.qq.com/pay/unifiedorder');
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, TRUE);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
         curl_setopt($ch, CURLOPT_HEADER, FALSE);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
         curl_setopt($ch, CURLOPT_POST, TRUE);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $xmlData);
         $data = curl_exec($ch);
-        if($data){
+        if ($data) {
             curl_close($ch);
             return $data;
         } else {
@@ -381,17 +411,18 @@ class WxappClient implements WxappInterface
      * @param array $data
      * @return string
      */
-    public function dataToXml(array $data) {
+    public function dataToXml(array $data)
+    {
         if ($data) {
             $xml = "<xml>";
             foreach ($data as $key => $val) {
-                if (is_numeric($val)){
-                    $xml.="<".$key.">".$val."</".$key.">";
-                }else{
-                    $xml.="<".$key."><![CDATA[".$val."]]></".$key.">";
+                if (is_numeric($val)) {
+                    $xml .= "<" . $key . ">" . $val . "</" . $key . ">";
+                } else {
+                    $xml .= "<" . $key . "><![CDATA[" . $val . "]]></" . $key . ">";
                 }
             }
-            $xml.="</xml>";
+            $xml .= "</xml>";
             return $xml;
         }
     }
@@ -401,7 +432,8 @@ class WxappClient implements WxappInterface
      * @param string $xml
      * @return mixed
      */
-    public function fromXml(string $xml) {
+    public function fromXml(string $xml)
+    {
         libxml_disable_entity_loader(true);
         $this->values = json_decode(json_encode(simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA)), true);
         return $this->values;
@@ -417,18 +449,19 @@ class WxappClient implements WxappInterface
      * @param int $second   url执行超时时间，默认30s
      * @return int|mixed
      */
-    public function postXmlCurl(string $xml, string $url, bool $useCert = false, int $second = 30) {
+    public function postXmlCurl(string $xml, string $url, bool $useCert = false, int $second = 30)
+    {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_TIMEOUT, $second);
-        curl_setopt($ch,CURLOPT_URL, $url);
-        curl_setopt($ch,CURLOPT_SSL_VERIFYPEER,TRUE);
-        curl_setopt($ch,CURLOPT_SSL_VERIFYHOST,2);
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, TRUE);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
         curl_setopt($ch, CURLOPT_HEADER, FALSE);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
         curl_setopt($ch, CURLOPT_POST, TRUE);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);
         $data = curl_exec($ch);
-        if($data){
+        if ($data) {
             curl_close($ch);
             return $data;
         } else {
@@ -437,5 +470,4 @@ class WxappClient implements WxappInterface
             return $error;
         }
     }
-
 }
